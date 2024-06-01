@@ -1,0 +1,31 @@
+{
+  "rootFolder": "src/test/resources/provided_input",
+  "applications": [
+    {
+      "name": "sales_api",
+      "environments": [
+        {
+          "name": "prod",
+          "configFilePath": "src/test/resources/provided_input/sales_api/prod/application.yaml"
+        },
+        {
+          "name": "pre-prod",
+          "configFilePath": "src/test/resources/provided_input/sales_api/pre-prod/application.yaml"
+        }
+      ]
+    },
+    {
+      "name": "retail",
+      "environments": [
+        {
+          "name": "prod",
+          "configFilePath": "src/test/resources/provided_input/retail/prod/application.yaml"
+        },
+        {
+          "name": "test",
+          "configFilePath": "src/test/resources/provided_input/retail/test/application.yaml"
+        }
+      ]
+    }
+  ]
+}

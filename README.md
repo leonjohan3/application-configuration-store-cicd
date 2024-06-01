@@ -15,4 +15,9 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
 
-Enjoy!
+# Resources
+- [](<https://commons.apache.org/proper/commons-cli/usage.html>)
+- [](<>)
+- [](<>)
+- [](<>)
+- [](<>)

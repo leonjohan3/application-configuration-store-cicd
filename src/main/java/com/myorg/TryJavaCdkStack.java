@@ -1,5 +1,6 @@
 package com.myorg;
 
+import java.nio.file.Path;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
@@ -14,12 +15,16 @@ import software.constructs.Construct;
 
 public class TryJavaCdkStack extends Stack {
 
-    public TryJavaCdkStack(final Construct scope, final String id) {
-        this(scope, id, null);
-    }
+//    private final Path rootFolder;
 
-    public TryJavaCdkStack(final Construct scope, final String id, final StackProps props) {
+//    public TryJavaCdkStack(final Construct scope, final String id, final Path rootFolder) {
+//        this(scope, id, null);
+//        this.rootFolder = rootFolder;
+//    }
+
+    public TryJavaCdkStack(final Construct scope, final String id, final StackProps props, final Path rootFolder) {
         super(scope, id, props);
+//        this.rootFolder = rootFolder;
 
         // The code that defines your stack goes here
 
@@ -28,15 +33,16 @@ public class TryJavaCdkStack extends Stack {
 //                 .visibilityTimeout(Duration.seconds(300))
 //                 .build();
 
-        var aaa = DeploymentStrategy.Builder.create(this, "TryJavaCdkDeploymentStrategy")
+        DeploymentStrategy.Builder.create(this, "TryJavaCdkDeploymentStrategy")
             .rolloutStrategy(RolloutStrategy.linear(RolloutStrategyProps.builder()
-                    .deploymentDuration(Duration.minutes(0))
-                    .finalBakeTime(Duration.minutes(0))
-                    .growthFactor(100)
+                .deploymentDuration(Duration.minutes(0))
+                .finalBakeTime(Duration.minutes(0))
+                .growthFactor(100)
                 .build()))
             .description("DeploymentStrategy for application configuration store that deploys without any delay")
             .deploymentStrategyName("acs-all-at-once-with-no-bake-time-cdk")
             .build();
+
 
         var applicationName = "myApp";
         var application = Application.Builder.create(this, "TryJavaCdkAppConfig")
