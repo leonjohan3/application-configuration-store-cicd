@@ -10,8 +10,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ConfigRootFactoryTests {
 
@@ -21,47 +25,38 @@ class ConfigRootFactoryTests {
     void shouldSuccessfullyBuildConfigRoot() throws IOException, JSONException {
         // given: all data (test fixture) preparation
         final var rootFolder = Path.of("src/test/resources/provided_input/");
+        final var dotGitFolder = Path.of(rootFolder.toString(), ".git");
+
+        if (!Files.exists(dotGitFolder)) { // to test that .git folders in the root are ignored
+            Files.createDirectory(dotGitFolder);
+        }
 
         // when : method to be checked invocation
         final var configRoot = ConfigRootFactory.createConfigRoot(rootFolder);
 
         // then : checks and assertions
-        assertEquals(Files.readString(Path.of("src/test/resources/com/myorg/file.json")), OBJECT_MAPPER.writeValueAsString(configRoot), true);
+        assertEquals(Files.readString(Path.of("src/test/resources/com/myorg/expectedConfigRoot.json")), OBJECT_MAPPER.writeValueAsString(configRoot), false);
     }
 
-    @Test
-    void shouldThrowExceptionForFileInEnvironmentsFolder() throws IOException {
+    @ParameterizedTest
+    @MethodSource("getShouldThrowExceptionArguments")
+    void shouldThrowExceptionForMultipleConfigurationFiles(final String rootFolder, final String expectedValueOne, final String expectedValueTwo) {
+
         // given: all data (test fixture) preparation
-        final var rootFolder = Path.of("src/test/resources/invalid_config_folder_structures/with_file_in_environments_folder");
+        final var rootFolderPath = Path.of("src/test/resources/invalid_config_folder_structures/" + rootFolder);
 
         // when : method to be checked invocation
-        final var exception = assertThrows(ConfigRootException.class, () -> ConfigRootFactory.createConfigRoot(rootFolder));
+        final var exception = assertThrows(ConfigRootException.class, () -> ConfigRootFactory.createConfigRoot(rootFolderPath));
 
         // then : checks and assertions
-        assertThat(exception.getMessage(), allOf(containsString("misplaced_file.tx"), containsString("only folders are allowed")));
+        assertThat(exception.getMessage(), allOf(containsString(expectedValueOne), containsString(expectedValueTwo)));
     }
 
-    @Test
-    void shouldThrowExceptionForFolderInPlaceOfaConfigurationFile() throws IOException {
-        // given: all data (test fixture) preparation
-        final var rootFolder = Path.of("src/test/resources/invalid_config_folder_structures/with_folder_in_place_of_a_configuration_file");
-
-        // when : method to be checked invocation
-        final var exception = assertThrows(ConfigRootException.class, () -> ConfigRootFactory.createConfigRoot(rootFolder));
-
-        // then : checks and assertions
-        assertThat(exception.getMessage(), allOf(containsString("misplaced_folder"), containsString("only files are allowed")));
-    }
-
-    @Test
-    void shouldThrowExceptionForMultipleConfigurationFiles() throws IOException {
-        // given: all data (test fixture) preparation
-        final var rootFolder = Path.of("src/test/resources/invalid_config_folder_structures/with_multiple_configuration_files");
-
-        // when : method to be checked invocation
-        final var exception = assertThrows(ConfigRootException.class, () -> ConfigRootFactory.createConfigRoot(rootFolder));
-
-        // then : checks and assertions
-        assertThat(exception.getMessage(), allOf(containsString("application.yam"), containsString("only one configuration file allowed")));
+    private static Stream<Arguments> getShouldThrowExceptionArguments() {
+        return Stream.of(
+            Arguments.of("with_file_in_environments_folder", "misplaced_file.tx", "only folders are allowed"),
+            Arguments.of("with_folder_in_place_of_a_configuration_file", "misplaced_folder", "only files are allowed"),
+            Arguments.of("with_multiple_configuration_files", "application.yam", "only one configuration file allowed")
+        );
     }
 }

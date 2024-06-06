@@ -1,27 +1,23 @@
 package com.myorg.model;
 
-import java.util.Objects;
 import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsExclude;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 
 @Builder
 @Jacksonized
-public record ConfigEnv(String name, String configFilePath) {
+public record ConfigEnv(String name, @EqualsExclude @HashCodeExclude String configFilePath) {
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ConfigEnv configEnv = (ConfigEnv) o;
-        return Objects.equals(name, configEnv.name);
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

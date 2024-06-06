@@ -15,7 +15,7 @@ public class RootFolderArg {
     private static final DefaultParser DEFAULT_PARSER = new DefaultParser();
     private static final Options OPTIONS = new Options();
 
-    {
+    static {
         OPTIONS.addOption(Option.builder(ROOT_FOLDER_OPTION)
             .argName("root_folder")
             .longOpt(ROOT_FOLDER_LONG_OPTION)
@@ -29,7 +29,8 @@ public class RootFolderArg {
     private final String[] args;
 
     public RootFolderArg(final String[] args) {
-        this.args = args;
+        this.args = new String[args.length];
+        System.arraycopy(args, 0, this.args, 0, args.length);
     }
 
     public String getRootFolder() {
