@@ -5,11 +5,12 @@ import static java.util.Set.copyOf;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.myorg.model.ConfigRoot.ConfigRootBuilder;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import org.apache.commons.lang3.builder.Builder;
 
 @JsonDeserialize(builder = ConfigRootBuilder.class)
-public record ConfigRoot(String rootFolder, Set<ConfigApp> applications) {
+public record ConfigRoot(@NotBlank String rootFolder, Set<ConfigApp> applications) {
 
     public ConfigRoot(final String rootFolder, final Set<ConfigApp> applications) {
         this.rootFolder = rootFolder;

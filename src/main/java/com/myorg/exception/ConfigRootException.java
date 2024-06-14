@@ -1,4 +1,4 @@
-package com.myorg;
+package com.myorg.exception;
 
 public class ConfigRootException extends RuntimeException {
 

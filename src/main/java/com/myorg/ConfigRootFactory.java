@@ -1,5 +1,8 @@
 package com.myorg;
 
+import static com.myorg.constants.ServiceConstants.MAX_WALK_DEPTH;
+
+import com.myorg.exception.ConfigRootException;
 import com.myorg.model.ConfigApp;
 import com.myorg.model.ConfigEnv;
 import com.myorg.model.ConfigRoot;
@@ -17,19 +20,18 @@ import lombok.experimental.UtilityClass;
 public class ConfigRootFactory {
 
     public static final int MAX_CONFIG_FILE_COUNT = 1;
-    public static final int MAX_DEPTH = 1;
 
     public static ConfigRoot createConfigRoot(final Path rootFolder) throws IOException {
         Objects.requireNonNull(rootFolder, "rootFolder must not be null");
         final var applications = new HashSet<ConfigApp>();
 
-        try (var applicationPaths = Files.walk(rootFolder, MAX_DEPTH)) {
+        try (var applicationPaths = Files.walk(rootFolder, MAX_WALK_DEPTH)) {
             applicationPaths.filter(applicationPath -> !applicationPath.equals(rootFolder)).forEach(applicationPath -> {
 
                 if (!applicationPath.endsWith(Path.of(".git")) && applicationPath.toFile().isDirectory()) {
                     final var environments = new HashSet<ConfigEnv>();
 
-                    try (var environmentPaths = Files.walk(applicationPath, MAX_DEPTH)) {
+                    try (var environmentPaths = Files.walk(applicationPath, MAX_WALK_DEPTH)) {
                         environmentPaths.filter(environmentPath -> !environmentPath.equals(applicationPath))
                             .forEach(environmentPath -> addConfigEnv(applicationPath, environmentPath, environments));
                     } catch (IOException e) {
@@ -56,7 +58,7 @@ public class ConfigRootFactory {
         if (environmentPath.toFile().isDirectory()) {
             final var configFileEntryCount = new AtomicInteger();
 
-            try (var configFilePaths = Files.walk(environmentPath, MAX_DEPTH)) {
+            try (var configFilePaths = Files.walk(environmentPath, MAX_WALK_DEPTH)) {
 
                 configFilePaths.filter(configFilePath -> !configFilePath.equals(environmentPath)).forEach(configFilePath -> {
 

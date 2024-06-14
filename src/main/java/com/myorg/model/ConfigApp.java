@@ -3,6 +3,7 @@ package com.myorg.model;
 import static java.util.Set.copyOf;
 
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import org.apache.commons.lang3.builder.Builder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -10,7 +11,7 @@ import org.apache.commons.lang3.builder.EqualsExclude;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.HashCodeExclude;
 
-public record ConfigApp(String name, @EqualsExclude @HashCodeExclude Set<ConfigEnv> environments) {
+public record ConfigApp(@NotBlank String name, @EqualsExclude @HashCodeExclude Set<ConfigEnv> environments) {
 
     public ConfigApp(final String name, final Set<ConfigEnv> environments) {
         this.name = name;

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.myorg.exception.ConfigRootException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.Validate.notBlank;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 import software.amazon.awscdk.App;
 import software.amazon.awscdk.StackProps;
 
@@ -38,6 +39,9 @@ public class AppConfigStoreCdkApp {
             */
 
             // For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
+            .description("AWS AppConfig infra for the application configuration store Git repo: ???TODO")
+            .tags(Map.of("key", "value-TODO"))
+            .terminationProtection(true)
             .build(), Path.of(rootFolderEnvVar));
 
         app.synth();

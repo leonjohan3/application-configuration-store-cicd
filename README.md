@@ -18,9 +18,11 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 # Resources
 - [](<https://commons.apache.org/proper/commons-cli/usage.html>)
 - [](<https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner-for-gradle/>)
-- [](<>)
-- [](<>)
+- [](<https://docs.spring.io/spring-framework/reference/index.html>)
+- [](<https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html>)
 - [](<>)
 
 # Todo
 - manually create .git folder if not exist before running test (because .git folder cannot be commited to GitHub) [done]
+- search for and address all TODO's
+- if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]{1,59}$', name):

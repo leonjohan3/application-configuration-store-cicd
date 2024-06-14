@@ -37,7 +37,7 @@ public final class AppConfigStoreCdkStack extends Stack {
         configRoot.applications().forEach(configApp -> {
 
             final var application = Application.Builder.create(this, configApp.name() + "AppConfig")
-                .applicationName("acs/" + configApp.name())
+                .applicationName("asc/" + configApp.name())
                 .description(configApp.name())
                 .build();
 
