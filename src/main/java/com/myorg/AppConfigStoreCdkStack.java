@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.capitalize;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Objects;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
@@ -18,9 +17,10 @@ import software.constructs.Construct;
 
 public final class AppConfigStoreCdkStack extends Stack {
 
-    public AppConfigStoreCdkStack(final Construct scope, final String id, final StackProps props, final Path rootFolder) throws IOException {
+    public AppConfigStoreCdkStack(final Construct scope, final String id, final StackProps props, final Path rootFolder, final String configGroup)
+        throws IOException {
+
         super(scope, id, props);
-        Objects.requireNonNull(rootFolder, "rootFolder must not be null");
 
         DeploymentStrategy.Builder.create(this, "applicationConfigurationStoreDeploymentStrategy")
             .rolloutStrategy(RolloutStrategy.linear(RolloutStrategyProps.builder()
@@ -29,7 +29,7 @@ public final class AppConfigStoreCdkStack extends Stack {
                 .growthFactor(100)
                 .build()))
             .description("DeploymentStrategy for application configuration store that deploys without any delay")
-            .deploymentStrategyName("acs-all-at-once-with-no-bake-time-cdk")
+            .deploymentStrategyName(configGroup + "-all-at-once-with-no-bake-time-cdk")
             .build();
 
         final var configRoot = ConfigRootFactory.createConfigRoot(rootFolder);
@@ -37,7 +37,7 @@ public final class AppConfigStoreCdkStack extends Stack {
         configRoot.applications().forEach(configApp -> {
 
             final var application = Application.Builder.create(this, configApp.name() + "AppConfig")
-                .applicationName("asc/" + configApp.name())
+                .applicationName(configGroup + "/" + configApp.name())
                 .description(configApp.name())
                 .build();
 

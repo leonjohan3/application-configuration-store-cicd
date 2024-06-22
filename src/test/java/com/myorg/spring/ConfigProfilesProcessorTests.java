@@ -2,12 +2,16 @@ package com.myorg.spring;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.myorg.constants.ServiceConstants;
 import com.myorg.model.appconfig.Application;
+import com.myorg.model.appconfig.ConfigurationProfile;
+import com.myorg.model.appconfig.HostedConfigurationVersion;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -20,9 +24,10 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig(classes = {ConfigProfilesProcessor.class, ConfigProfilesProcessorTests.Config.class, Config.class})
 @TestPropertySource(properties = """
-    app.config.application.prefix = acs
+    app.config.group.prefix = acs
     app.config.root.config.folder = src/test/resources/provided_input
     """)
+@SuppressFBWarnings(value = "NP_NONNULL_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
 class ConfigProfilesProcessorTests {
 
     private static final AppConfigFacade APP_CONFIG_FACADE = mock(AppConfigFacade.class);
@@ -42,21 +47,110 @@ class ConfigProfilesProcessorTests {
     @Value("${" + ServiceConstants.APP_CONFIG_ROOT_CONFIG_FOLDER + "}")
     private Path rootConfigFolder;
 
-    @Value("${" + ServiceConstants.APP_CONFIG_APPLICATION_PREFIX + "}")
-    private String applicationPrefix;
+    @Value("${" + ServiceConstants.APP_CONFIG_GROUP_PREFIX + "}")
+    private String configGroupPrefix;
 
     @Test
-    void shouldA() {
-        when(APP_CONFIG_FACADE.listApplications(anyString())).thenReturn(List.of(new Application("a", "aa"), new Application("b", "bb")));
-        final var applications = configProfilesProcessor.run(rootConfigFolder, applicationPrefix);
+    void shouldFindSomeDiffs() {
+        // given: all data (test fixture) preparation
+        final var applicationA = new Application("a", "acs/retail");
+        final var applicationB = new Application("b", "acs/sales_api");
+        final var configurationProfileA = new ConfigurationProfile("cp-a", "prod");
+        final var configurationProfileB = new ConfigurationProfile("cp-b", "test");
+        final var configurationProfileC = new ConfigurationProfile("cp-c", "pre-prod");
+        final var hostedConfigurationVersionOne = new HostedConfigurationVersion(1);
+        final var hostedConfigurationVersionTwo = new HostedConfigurationVersion(2);
+
+        when(APP_CONFIG_FACADE.listApplications(anyString())).thenReturn(List.of(applicationA, applicationB));
+        when(APP_CONFIG_FACADE.listConfigurationProfiles(applicationA)).thenReturn(List.of(configurationProfileA, configurationProfileB));
+        when(APP_CONFIG_FACADE.listConfigurationProfiles(applicationB)).thenReturn(List.of(configurationProfileC));
+        when(APP_CONFIG_FACADE.listHostedConfigurationVersions(applicationA, configurationProfileA)).thenReturn(
+            List.of(hostedConfigurationVersionOne, hostedConfigurationVersionTwo));
+        when(APP_CONFIG_FACADE.listHostedConfigurationVersions(applicationA, configurationProfileB)).thenReturn(List.of(hostedConfigurationVersionTwo));
+        when(APP_CONFIG_FACADE.listHostedConfigurationVersions(applicationB, configurationProfileC)).thenReturn(List.of(hostedConfigurationVersionOne));
+        when(APP_CONFIG_FACADE.getHostedConfigVersionContent(applicationA, configurationProfileA, 2)).thenReturn("debug: true");
+        when(APP_CONFIG_FACADE.getHostedConfigVersionContent(applicationA, configurationProfileB, 2)).thenReturn("debug: false");
+        when(APP_CONFIG_FACADE.getHostedConfigVersionContent(applicationB, configurationProfileC, 1)).thenReturn("debug: all");
+
+        // when : method to be checked invocation
+        final var applications = configProfilesProcessor.run(rootConfigFolder, configGroupPrefix);
+
+        // then : checks and assertions
+        assertThat(applications, hasSize(2));
+
+        applications.forEach(configApp -> {
+            if (configApp.name().equals("acs/retail")) {
+                assertThat(configApp.environments(), hasSize(2));
+            } else {
+                assertThat(configApp.name(), is("acs/sales_api"));
+                assertThat(configApp.environments(), hasSize(1));
+            }
+        });
+    }
+
+    @Test
+    void shouldAllowMissingConfigFile() {
+
+        // given: all data (test fixture) preparation
+        final var applicationA = new Application("a", "acs/retail");
+        final var configurationProfileA = new ConfigurationProfile("cp-a", "pre-prod");
+        final var hostedConfigurationVersionTwo = new HostedConfigurationVersion(2);
+
+        when(APP_CONFIG_FACADE.listApplications(anyString())).thenReturn(List.of(applicationA));
+        when(APP_CONFIG_FACADE.listConfigurationProfiles(applicationA)).thenReturn(List.of(configurationProfileA));
+        when(APP_CONFIG_FACADE.listHostedConfigurationVersions(applicationA, configurationProfileA)).thenReturn(List.of(hostedConfigurationVersionTwo));
+        when(APP_CONFIG_FACADE.getHostedConfigVersionContent(applicationA, configurationProfileA, 2)).thenReturn("debug: true");
+
+        // when : method to be checked invocation
+        final var applications = configProfilesProcessor.run(rootConfigFolder, configGroupPrefix);
+
+        // then : checks and assertions
         assertThat(applications, hasSize(0));
     }
 
     @Test
-    void shouldB() {
-        when(APP_CONFIG_FACADE.listApplications(anyString())).thenReturn(
-            List.of(new Application("a", "aa"), new Application("b", "bb"), new Application("c", "cc")));
-        final var applications = configProfilesProcessor.run(rootConfigFolder, applicationPrefix);
+    void shouldAllowMissingHostedVersion() {
+
+        // given: all data (test fixture) preparation
+        final var applicationA = new Application("a", "acs/retail");
+        final var configurationProfileA = new ConfigurationProfile("cp-a", "pre-prod");
+
+        when(APP_CONFIG_FACADE.listApplications(anyString())).thenReturn(List.of(applicationA));
+        when(APP_CONFIG_FACADE.listConfigurationProfiles(applicationA)).thenReturn(List.of(configurationProfileA));
+
+        // when : method to be checked invocation
+        final var applications = configProfilesProcessor.run(rootConfigFolder, configGroupPrefix);
+
+        // then : checks and assertions
+        assertThat(applications, hasSize(0));
+    }
+
+    @Test
+    void shouldFindNoDiffs() {
+
+        // given: all data (test fixture) preparation
+        final var applicationA = new Application("a", "acs/sales_api");
+        final var configurationProfileA = new ConfigurationProfile("cp-a", "pre-prod");
+        final var hostedConfigurationVersionTwo = new HostedConfigurationVersion(1);
+
+        when(APP_CONFIG_FACADE.listApplications(anyString())).thenReturn(List.of(applicationA));
+        when(APP_CONFIG_FACADE.listConfigurationProfiles(applicationA)).thenReturn(List.of(configurationProfileA));
+        when(APP_CONFIG_FACADE.listHostedConfigurationVersions(applicationA, configurationProfileA)).thenReturn(List.of(hostedConfigurationVersionTwo));
+        final var configFileContent = """
+            spring:
+              mvc:
+                servlet:
+                  load-on-startup: 1
+                        
+              main:
+                banner-mode: off
+            """;
+        when(APP_CONFIG_FACADE.getHostedConfigVersionContent(applicationA, configurationProfileA, 1)).thenReturn(configFileContent);
+
+        // when : method to be checked invocation
+        final var applications = configProfilesProcessor.run(rootConfigFolder, configGroupPrefix);
+
+        // then : checks and assertions
         assertThat(applications, hasSize(0));
     }
 }

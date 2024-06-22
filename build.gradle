@@ -88,8 +88,8 @@ tasks.withType(Checkstyle).configureEach {
         xml.required = false
         html.required = true
     }
-//    maxErrors = 1
-//    maxWarnings = 1
+    maxErrors = 1
+    maxWarnings = 1
 }
 
 spotbugsMain {
@@ -97,6 +97,16 @@ spotbugsMain {
         html {
             required = true
             outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+spotbugsTest {
+    reports {
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/test/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
     }

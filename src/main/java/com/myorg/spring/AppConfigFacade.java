@@ -1,13 +1,14 @@
 package com.myorg.spring;
 
-import static com.myorg.constants.ServiceConstants.APP_PREFIX_MESSAGE;
-import static com.myorg.constants.ServiceConstants.APP_PREFIX_PATTERN;
+import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
+import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import com.myorg.model.appconfig.Application;
 import com.myorg.model.appconfig.ConfigurationProfile;
 import com.myorg.model.appconfig.HostedConfigurationVersion;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -31,12 +32,13 @@ import software.amazon.awssdk.services.appconfig.model.ResourceNotFoundException
 @Profile("!test")
 @Slf4j
 @Validated
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 public class AppConfigFacade {
 
     private final AppConfigClient appConfigClient;
 
     public @NotNull List<@Valid Application> listApplications(
-        @NotNull @Pattern(regexp = APP_PREFIX_PATTERN, message = APP_PREFIX_MESSAGE) final String applicationPrefix) {
+        @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix) {
 
         final var applications = new ArrayList<Application>();
         String nextToken = null;
@@ -53,7 +55,7 @@ public class AppConfigFacade {
             }
             nextToken = listApplicationsResponse.nextToken();
 
-            applications.addAll(listApplicationsResponse.items().stream().filter(item -> item.name().startsWith(applicationPrefix + "/"))
+            applications.addAll(listApplicationsResponse.items().stream().filter(item -> item.name().startsWith(configGroupPrefix + "/"))
                 .map(item -> new Application(item.id(), item.name())).toList());
 
         } while (nonNull(nextToken));

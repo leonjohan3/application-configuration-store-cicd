@@ -19,7 +19,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ConfigRootFactory {
 
-    public static final int MAX_CONFIG_FILE_COUNT = 1;
+    private static final int MAX_CONFIG_FILE_COUNT = 1;
 
     public static ConfigRoot createConfigRoot(final Path rootFolder) throws IOException {
         Objects.requireNonNull(rootFolder, "rootFolder must not be null");

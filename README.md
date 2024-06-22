@@ -26,3 +26,4 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 - manually create .git folder if not exist before running test (because .git folder cannot be commited to GitHub) [done]
 - search for and address all TODO's
 - if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]{1,59}$', name):
+- enable PMD on all files

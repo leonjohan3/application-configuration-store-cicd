@@ -1,6 +1,6 @@
 package com.myorg;
 
-import static com.myorg.constants.ServiceConstants.APP_CONFIG_APPLICATION_PREFIX;
+import static com.myorg.constants.ServiceConstants.APP_CONFIG_GROUP_PREFIX;
 import static com.myorg.constants.ServiceConstants.APP_CONFIG_ROOT_CONFIG_FOLDER;
 
 import com.myorg.spring.ConfigProfilesProcessor;
@@ -16,7 +16,7 @@ public class DiffConfigProfile {
             ctx.scan("com.myorg.spring");
             ctx.refresh();
             final var configApps = ctx.getBean(ConfigProfilesProcessor.class).run(Path.of(ctx.getEnvironment().getRequiredProperty(APP_CONFIG_ROOT_CONFIG_FOLDER)),
-                ctx.getEnvironment().getRequiredProperty(APP_CONFIG_APPLICATION_PREFIX));
+                ctx.getEnvironment().getRequiredProperty(APP_CONFIG_GROUP_PREFIX));
 
             configApps.forEach(configApp -> configApp.environments().forEach(
                 configEnv -> log.info("The configuration of the `{}` environment of the `{}` application will be updated in AWS AppConfig", configEnv.name(),

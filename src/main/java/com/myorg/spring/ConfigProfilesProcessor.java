@@ -1,7 +1,7 @@
 package com.myorg.spring;
 
-import static com.myorg.constants.ServiceConstants.APP_PREFIX_MESSAGE;
-import static com.myorg.constants.ServiceConstants.APP_PREFIX_PATTERN;
+import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
+import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
 import static com.myorg.constants.ServiceConstants.MAX_WALK_DEPTH;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
@@ -15,12 +15,14 @@ import jakarta.validation.constraints.Pattern;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
@@ -30,27 +32,28 @@ import org.springframework.validation.annotation.Validated;
 @RequiredArgsConstructor
 @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 @Validated
+@Slf4j
 public class ConfigProfilesProcessor {
 
     private final AppConfigFacade appConfigFacade;
 
     public @NotNull Set<ConfigApp> run(@NotNull final Path rootConfigFolder,
-        @NotNull @Pattern(regexp = APP_PREFIX_PATTERN, message = APP_PREFIX_MESSAGE) final String applicationPrefix) {
+        @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix) {
 
         final var configApps = new HashSet<ConfigApp>();
 
-        appConfigFacade.listApplications(applicationPrefix)
-            .forEach(application -> processApplication(application, rootConfigFolder, applicationPrefix).ifPresent(configApps::add));
+        appConfigFacade.listApplications(configGroupPrefix)
+            .forEach(application -> processApplication(application, rootConfigFolder, configGroupPrefix).ifPresent(configApps::add));
 
         return configApps;
     }
 
-    private Optional<ConfigApp> processApplication(final Application application, final Path rootConfigFolder, final String applicationPrefix) {
+    private Optional<ConfigApp> processApplication(final Application application, final Path rootConfigFolder, final String configGroupPrefix) {
         final var configEnvs = new HashSet<ConfigEnv>();
 
         appConfigFacade.listConfigurationProfiles(application)
             .forEach(configurationProfile -> processConfigurationProfile(application, configurationProfile, Path.of(rootConfigFolder.toString(),
-                removeStart(application.name(), applicationPrefix + "/"))).ifPresent(configEnvs::add));
+                removeStart(application.name(), configGroupPrefix + "/"))).ifPresent(configEnvs::add));
 
         return Optional.ofNullable(configEnvs.isEmpty() ? null : new ConfigApp(application.name(), configEnvs));
     }
@@ -97,6 +100,9 @@ public class ConfigProfilesProcessor {
             final var configFile = environmentPaths.filter(environmentPath -> environmentPath.toFile().isFile()).findFirst();
             return Optional.ofNullable(configFile.isPresent() ? new ImmutablePair<>(configFile.get(), Files.readString(configFile.get())) : null);
 
+        } catch (NoSuchFileException e) {
+            log.debug("ignoring NoSuchFileException");
+            return Optional.empty();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
