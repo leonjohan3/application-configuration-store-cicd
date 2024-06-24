@@ -40,3 +40,4 @@ target
 
 cdk.out
 
+!gradle-wrapper.jar
