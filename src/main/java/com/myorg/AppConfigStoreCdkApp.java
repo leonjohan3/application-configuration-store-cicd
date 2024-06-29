@@ -50,7 +50,7 @@ public class AppConfigStoreCdkApp {
             // For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
             .description("AWS AppConfig infra for the application configuration store Git repo: ???TODO-get value from pipeline/build")
             .tags(Map.of(APP_CONFIG_GROUP_PREFIX, configGroupEnvVar))
-            .terminationProtection(true)
+            //            .terminationProtection(true) - TODO
             .build(), Path.of(rootFolderEnvVar), configGroupEnvVar);
 
         app.synth();

@@ -3,7 +3,7 @@ package com.myorg.spring;
 import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
 import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
 import static com.myorg.constants.ServiceConstants.MAX_WALK_DEPTH;
-import static org.apache.commons.lang3.StringUtils.removeStart;
+import static java.nio.file.Files.readString;
 
 import com.myorg.model.ConfigApp;
 import com.myorg.model.ConfigEnv;
@@ -38,34 +38,55 @@ public class ConfigProfilesProcessor {
     private final AppConfigFacade appConfigFacade;
 
     public @NotNull Set<ConfigApp> run(@NotNull final Path rootConfigFolder,
-        @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix) {
+        @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix, final boolean update) {
 
         final var configApps = new HashSet<ConfigApp>();
 
         appConfigFacade.listApplications(configGroupPrefix)
-            .forEach(application -> processApplication(application, rootConfigFolder, configGroupPrefix).ifPresent(configApps::add));
+            .forEach(application -> processApplication(application, rootConfigFolder, configGroupPrefix, update).ifPresent(configApps::add));
 
         return configApps;
     }
 
-    private Optional<ConfigApp> processApplication(final Application application, final Path rootConfigFolder, final String configGroupPrefix) {
+    private Optional<ConfigApp> processApplication(final Application application, final Path rootConfigFolder, final String configGroupPrefix,
+        final boolean update) {
+
         final var configEnvs = new HashSet<ConfigEnv>();
 
         appConfigFacade.listConfigurationProfiles(application)
-            .forEach(configurationProfile -> processConfigurationProfile(application, configurationProfile, Path.of(rootConfigFolder.toString(),
-                removeStart(application.name(), configGroupPrefix + "/"))).ifPresent(configEnvs::add));
+            .forEach(configurationProfile -> processConfigurationProfile(application, configurationProfile,
+                Path.of(rootConfigFolder.toString(), application.plainName()), update).ifPresent(configEnvs::add));
 
         return Optional.ofNullable(configEnvs.isEmpty() ? null : new ConfigApp(application.name(), configEnvs));
     }
 
-    private Optional<ConfigEnv> processConfigurationProfile(final Application application, final ConfigurationProfile configurationProfile, final Path path) {
+    private Optional<ConfigEnv> processConfigurationProfile(final Application application, final ConfigurationProfile configurationProfile, final Path path,
+        final boolean update) {
 
         final var environmentPath = Path.of(path.toString(), configurationProfile.name());
         final var latestVersion = getLatestHostedConfigVersion(application, configurationProfile);
         Optional<Path> configFileToUseForUpdate = Optional.empty();
 
         if (latestVersion.isPresent()) {
-            configFileToUseForUpdate = checkIfAnUpdateIsRequired(application, configurationProfile, latestVersion.get(), environmentPath);
+            final var checkIfAnUpdateIsRequiredResult = checkIfAnUpdateIsRequired(application, configurationProfile, latestVersion.get(), environmentPath);
+
+            if (checkIfAnUpdateIsRequiredResult.isPresent()) {
+
+                if (update) { // update HostedConfigVersion (by creating a new version)
+                    appConfigFacade.createHostedConfigVersion(application, configurationProfile, checkIfAnUpdateIsRequiredResult.get().getRight());
+                }
+                configFileToUseForUpdate = Optional.of(checkIfAnUpdateIsRequiredResult.get().getLeft());
+            }
+
+        } else {
+            if (update) { // create 1st HostedConfigVersion (version 1)
+                final var configFileAndContent = getConfigFileAndContent(environmentPath);
+
+                if (configFileAndContent.isPresent()) {
+                    appConfigFacade.createHostedConfigVersion(application, configurationProfile, configFileAndContent.get().getRight());
+                    configFileToUseForUpdate = Optional.of(configFileAndContent.get().getLeft());
+                }
+            }
         }
         return configFileToUseForUpdate.map(configFilePath -> new ConfigEnv(configurationProfile.name(), configFilePath.toString()));
     }
@@ -79,8 +100,8 @@ public class ConfigProfilesProcessor {
         return Optional.ofNullable(versions.isEmpty() ? null : versions.last());
     }
 
-    private Optional<Path> checkIfAnUpdateIsRequired(final Application application, final ConfigurationProfile configurationProfile, final int version,
-        final Path path) {
+    private Optional<Pair<Path, String>> checkIfAnUpdateIsRequired(final Application application, final ConfigurationProfile configurationProfile,
+        final int version, final Path path) {
 
         var hasDiff = false;
         final var configFileAndContent = getConfigFileAndContent(path);
@@ -90,7 +111,7 @@ public class ConfigProfilesProcessor {
             hasDiff = !configFileAndContent.get().getRight().equals(hostedConfigVersionContent);
         }
 
-        return Optional.ofNullable(hasDiff ? configFileAndContent.get().getLeft() : null);
+        return Optional.ofNullable(hasDiff ? configFileAndContent.get() : null);
     }
 
     private Optional<Pair<Path, String>> getConfigFileAndContent(final Path path) {
@@ -98,7 +119,7 @@ public class ConfigProfilesProcessor {
         try (var environmentPaths = Files.walk(path, MAX_WALK_DEPTH)) {
 
             final var configFile = environmentPaths.filter(environmentPath -> environmentPath.toFile().isFile()).findFirst();
-            return Optional.ofNullable(configFile.isPresent() ? new ImmutablePair<>(configFile.get(), Files.readString(configFile.get())) : null);
+            return Optional.ofNullable(configFile.isPresent() ? new ImmutablePair<>(configFile.get(), readString(configFile.get())) : null);
 
         } catch (NoSuchFileException e) {
             log.debug("ignoring NoSuchFileException");

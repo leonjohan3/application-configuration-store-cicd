@@ -1,9 +1,14 @@
 package com.myorg.spring;
 
+import static com.myorg.Util.extractPlainApplicationName;
 import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
 import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
+import static java.lang.String.format;
+import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN_VALUE;
+import static software.amazon.awssdk.core.SdkBytes.fromUtf8String;
 
 import com.myorg.model.appconfig.Application;
 import com.myorg.model.appconfig.ConfigurationProfile;
@@ -13,6 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,7 +62,7 @@ public class AppConfigFacade {
             nextToken = listApplicationsResponse.nextToken();
 
             applications.addAll(listApplicationsResponse.items().stream().filter(item -> item.name().startsWith(configGroupPrefix + "/"))
-                .map(item -> new Application(item.id(), item.name())).toList());
+                .map(item -> new Application(item.id(), item.name(), extractPlainApplicationName(item.name(), configGroupPrefix))).toList());
 
         } while (nonNull(nextToken));
 
@@ -108,6 +114,19 @@ public class AppConfigFacade {
         } while (Objects.nonNull(nextToken));
 
         return hostedConfigVersions;
+    }
+
+    public void createHostedConfigVersion(@Valid final Application application, final @Valid ConfigurationProfile configurationProfile,
+        @NotNull final String content) {
+
+        appConfigClient.createHostedConfigurationVersion(
+            builder -> builder.applicationId(application.id())
+                .configurationProfileId(configurationProfile.id())
+                .content(fromUtf8String(content))
+                .contentType(TEXT_PLAIN_VALUE)
+                .description(format("Configuration that will be deployed to the `%s` environment of the `%s` application, created %s", configurationProfile.name(),
+                    application.plainName(), ISO_ZONED_DATE_TIME.format(ZonedDateTime.now())))
+                .build());
     }
 
     public @NotNull String getHostedConfigVersionContent(@Valid final Application application,

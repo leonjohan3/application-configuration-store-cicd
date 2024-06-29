@@ -53,7 +53,7 @@ class ConfigProfilesProcessorMoreTests {
     void shouldAllowMissingConfigFile() {
 
         // given: all data (test fixture) preparation
-        final var applicationA = new Application("a", "acs/my_application");
+        final var applicationA = new Application("a", "acs/my_application", "my_application");
         final var configurationProfileA = new ConfigurationProfile("cp-a", "my_environment");
         final var hostedConfigurationVersionTwo = new HostedConfigurationVersion(1);
 
@@ -63,7 +63,7 @@ class ConfigProfilesProcessorMoreTests {
         when(APP_CONFIG_FACADE.getHostedConfigVersionContent(applicationA, configurationProfileA, 2)).thenReturn("debug: true");
 
         // when : method to be checked invocation
-        final var applications = configProfilesProcessor.run(rootConfigFolder, configGroupPrefix);
+        final var applications = configProfilesProcessor.run(rootConfigFolder, configGroupPrefix, false);
 
         // then : checks and assertions
         assertThat(applications, hasSize(0));
