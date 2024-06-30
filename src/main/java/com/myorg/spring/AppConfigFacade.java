@@ -3,7 +3,9 @@ package com.myorg.spring;
 import static com.myorg.Util.extractPlainApplicationName;
 import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
 import static com.myorg.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
+import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -11,11 +13,16 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN_VALUE;
 import static software.amazon.awssdk.core.SdkBytes.fromUtf8String;
 
 import com.myorg.model.appconfig.Application;
+import com.myorg.model.appconfig.ConfigurationEnvironment;
 import com.myorg.model.appconfig.ConfigurationProfile;
+import com.myorg.model.appconfig.Deployment;
+import com.myorg.model.appconfig.DeploymentStrategy;
 import com.myorg.model.appconfig.HostedConfigurationVersion;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.ZonedDateTime;
@@ -30,6 +37,9 @@ import org.springframework.validation.annotation.Validated;
 import software.amazon.awssdk.services.appconfig.AppConfigClient;
 import software.amazon.awssdk.services.appconfig.model.ListApplicationsResponse;
 import software.amazon.awssdk.services.appconfig.model.ListConfigurationProfilesResponse;
+import software.amazon.awssdk.services.appconfig.model.ListDeploymentStrategiesResponse;
+import software.amazon.awssdk.services.appconfig.model.ListDeploymentsResponse;
+import software.amazon.awssdk.services.appconfig.model.ListEnvironmentsResponse;
 import software.amazon.awssdk.services.appconfig.model.ListHostedConfigurationVersionsResponse;
 import software.amazon.awssdk.services.appconfig.model.ResourceNotFoundException;
 
@@ -57,7 +67,7 @@ public class AppConfigFacade {
                 });
             } else {
                 final var finalNextToken = nextToken;
-                listApplicationsResponse = appConfigClient.listApplications(lar -> lar.nextToken(finalNextToken));
+                listApplicationsResponse = appConfigClient.listApplications(builder -> builder.nextToken(finalNextToken));
             }
             nextToken = listApplicationsResponse.nextToken();
 
@@ -69,7 +79,7 @@ public class AppConfigFacade {
         return applications;
     }
 
-    public @NotNull List<@Valid ConfigurationProfile> listConfigurationProfiles(@Valid final Application application) {
+    public @NotEmpty List<@Valid ConfigurationProfile> listConfigurationProfiles(@Valid final Application application) {
 
         final var configurationProfiles = new ArrayList<ConfigurationProfile>();
         String nextToken = null;
@@ -78,10 +88,11 @@ public class AppConfigFacade {
             ListConfigurationProfilesResponse listConfigProfilesResponse;
 
             if (Objects.isNull(nextToken)) {
-                listConfigProfilesResponse = appConfigClient.listConfigurationProfiles(lcpr -> lcpr.applicationId(application.id()));
+                listConfigProfilesResponse = appConfigClient.listConfigurationProfiles(builder -> builder.applicationId(application.id()));
             } else {
                 final var finalNextToken = nextToken;
-                listConfigProfilesResponse = appConfigClient.listConfigurationProfiles(lcpr -> lcpr.applicationId(application.id()).nextToken(finalNextToken));
+                listConfigProfilesResponse = appConfigClient.listConfigurationProfiles(
+                    builder -> builder.applicationId(application.id()).nextToken(finalNextToken));
             }
             nextToken = listConfigProfilesResponse.nextToken();
             configurationProfiles.addAll(listConfigProfilesResponse.items().stream().map(item -> new ConfigurationProfile(item.id(), item.name())).toList());
@@ -89,6 +100,29 @@ public class AppConfigFacade {
         } while (Objects.nonNull(nextToken));
 
         return configurationProfiles;
+    }
+
+    public @NotEmpty List<@Valid ConfigurationEnvironment> listConfigurationEnvironments(@Valid final Application application) {
+
+        final var configurationEnvironments = new ArrayList<ConfigurationEnvironment>();
+        String nextToken = null;
+
+        do {
+            ListEnvironmentsResponse listEnvironmentsResponse;
+
+            if (Objects.isNull(nextToken)) {
+                listEnvironmentsResponse = appConfigClient.listEnvironments(builder -> builder.applicationId(application.id()));
+            } else {
+                final var finalNextToken = nextToken;
+                listEnvironmentsResponse = appConfigClient.listEnvironments(builder -> builder.applicationId(application.id()).nextToken(finalNextToken));
+            }
+            nextToken = listEnvironmentsResponse.nextToken();
+            configurationEnvironments.addAll(
+                listEnvironmentsResponse.items().stream().map(item -> new ConfigurationEnvironment(item.id(), item.name(), item.stateAsString())).toList());
+
+        } while (Objects.nonNull(nextToken));
+
+        return configurationEnvironments;
     }
 
     public @NotNull List<@Valid HostedConfigurationVersion> listHostedConfigurationVersions(@Valid final Application application,
@@ -99,13 +133,14 @@ public class AppConfigFacade {
 
         do {
             ListHostedConfigurationVersionsResponse listHostedConfigVersionsResponse;
+
             if (Objects.isNull(nextToken)) {
                 listHostedConfigVersionsResponse = appConfigClient.listHostedConfigurationVersions(
-                    lhcvr -> lhcvr.applicationId(application.id()).configurationProfileId(configurationProfile.id()));
+                    builder -> builder.applicationId(application.id()).configurationProfileId(configurationProfile.id()));
             } else {
                 final var finalNextToken = nextToken;
                 listHostedConfigVersionsResponse = appConfigClient.listHostedConfigurationVersions(
-                    lhcvr -> lhcvr.applicationId(application.id()).configurationProfileId(configurationProfile.id()).nextToken(finalNextToken));
+                    builder -> builder.applicationId(application.id()).configurationProfileId(configurationProfile.id()).nextToken(finalNextToken));
             }
             nextToken = listHostedConfigVersionsResponse.nextToken();
             hostedConfigVersions.addAll(
@@ -116,7 +151,56 @@ public class AppConfigFacade {
         return hostedConfigVersions;
     }
 
-    public void createHostedConfigVersion(@Valid final Application application, final @Valid ConfigurationProfile configurationProfile,
+    public @NotNull List<@Valid Deployment> listDeployments(@Valid final Application application, @Valid final ConfigurationEnvironment configurationEnvironment) {
+
+        String nextToken = null;
+        final var deployments = new ArrayList<Deployment>();
+
+        do {
+            ListDeploymentsResponse listDeploymentsResponse;
+
+            if (Objects.isNull(nextToken)) {
+                listDeploymentsResponse = appConfigClient.listDeployments(
+                    builder -> builder.applicationId(application.id()).environmentId(configurationEnvironment.id()));
+            } else {
+                final var finalNextToken = nextToken;
+                listDeploymentsResponse = appConfigClient.listDeployments(
+                    builder -> builder.applicationId(application.id()).environmentId(configurationEnvironment.id()).nextToken(finalNextToken));
+            }
+            nextToken = listDeploymentsResponse.nextToken();
+            deployments.addAll(
+                listDeploymentsResponse.items().stream().map(item -> new Deployment(item.deploymentNumber(), parseInt(item.configurationVersion()))).toList());
+
+        } while (Objects.nonNull(nextToken));
+
+        return deployments;
+    }
+
+    public @NotEmpty List<@Valid DeploymentStrategy> listDeploymentStrategies() {
+
+        String nextToken = null;
+        final var deploymentStrategies = new ArrayList<DeploymentStrategy>();
+
+        do {
+            ListDeploymentStrategiesResponse listDeploymentStrategiesResponse;
+
+            if (Objects.isNull(nextToken)) {
+                listDeploymentStrategiesResponse = appConfigClient.listDeploymentStrategies(builder -> {
+                });
+            } else {
+                final var finalNextToken = nextToken;
+                listDeploymentStrategiesResponse = appConfigClient.listDeploymentStrategies(builder -> builder.nextToken(finalNextToken));
+            }
+            nextToken = listDeploymentStrategiesResponse.nextToken();
+            deploymentStrategies.addAll(
+                listDeploymentStrategiesResponse.items().stream().map(item -> new DeploymentStrategy(item.id(), item.name())).toList());
+
+        } while (Objects.nonNull(nextToken));
+
+        return deploymentStrategies;
+    }
+
+    public void createHostedConfigVersion(@Valid final Application application, @Valid final ConfigurationProfile configurationProfile,
         @NotNull final String content) {
 
         appConfigClient.createHostedConfigurationVersion(
@@ -129,7 +213,7 @@ public class AppConfigFacade {
                 .build());
     }
 
-    public void deleteHostedConfigVersion(@Valid final Application application, final @Valid ConfigurationProfile configurationProfile,
+    public void deleteHostedConfigVersion(@Valid final Application application, @Valid final ConfigurationProfile configurationProfile,
         @Min(1) final int hostedConfigurationVersion) {
 
         appConfigClient.deleteHostedConfigurationVersion(builder -> builder.applicationId(application.id())
@@ -138,8 +222,16 @@ public class AppConfigFacade {
             .build());
     }
 
+    public void deployHostedConfigVersion(@Valid final Application application, @Valid final ConfigurationProfile configurationProfile,
+        @Valid final ConfigurationEnvironment configurationEnvironment, @Min(1) final int hostedConfigurationVersion, @NotBlank final String deploymentStrategyId) {
+
+        appConfigClient.startDeployment(builder -> builder.applicationId(application.id()).configurationProfileId(configurationProfile.id())
+            .configurationVersion(valueOf(hostedConfigurationVersion)).environmentId(configurationEnvironment.id()).deploymentStrategyId(deploymentStrategyId)
+            .build());
+    }
+
     public @NotNull String getHostedConfigVersionContent(@Valid final Application application,
-        final @Valid ConfigurationProfile configurationProfile, @Min(1) final int hostedConfigurationVersion) {
+        @Valid final ConfigurationProfile configurationProfile, @Min(1) final int hostedConfigurationVersion) {
 
         String hostedConfigVersionContent = null;
 

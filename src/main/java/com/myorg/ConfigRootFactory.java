@@ -65,7 +65,6 @@ public class ConfigRootFactory {
                     if (configFilePath.toFile().isFile()) {
                         environments.add(ConfigEnv.builder()
                             .name(environmentPath.getFileName().toString())
-                            .configFilePath(configFilePath.toString())
                             .build());
                     } else {
                         throw new ConfigRootException("Invalid configuration file entry, only files are allowed: " + configFilePath);

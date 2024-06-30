@@ -5,12 +5,10 @@
       "name": "retail",
       "environments": [
         {
-          "name": "test",
-          "configFilePath": "src/test/resources/provided_input/retail/test/application.yaml"
+          "name": "test"
         },
         {
-          "name": "prod",
-          "configFilePath": "src/test/resources/provided_input/retail/prod/application.yaml"
+          "name": "prod"
         }
       ]
     },
@@ -18,12 +16,10 @@
       "name": "sales_api",
       "environments": [
         {
-          "name": "pre-prod",
-          "configFilePath": "src/test/resources/provided_input/sales_api/pre-prod/application.yaml"
+          "name": "pre-prod"
         },
         {
-          "name": "prod",
-          "configFilePath": "src/test/resources/provided_input/sales_api/prod/application.yaml"
+          "name": "prod"
         }
       ]
     }

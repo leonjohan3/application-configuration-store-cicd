@@ -20,8 +20,6 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,10 +34,14 @@ import org.springframework.validation.annotation.Validated;
 public class ConfigProfilesProcessor {
 
     private final AppConfigFacade appConfigFacade;
+    private final ConfigVersionService configVersionService;
     private final int hostedConfigVersionsToKeep;
 
-    public ConfigProfilesProcessor(final AppConfigFacade appConfigFacade, @Value("${hosted.config.versions.to.keep:10}") final int hostedConfigVersionsToKeep) {
+    public ConfigProfilesProcessor(final AppConfigFacade appConfigFacade, final ConfigVersionService configVersionService,
+        @Value("${hosted.config.versions.to.keep:10}") final int hostedConfigVersionsToKeep) {
+
         this.appConfigFacade = appConfigFacade;
+        this.configVersionService = configVersionService;
         this.hostedConfigVersionsToKeep = hostedConfigVersionsToKeep;
     }
 
@@ -69,7 +71,7 @@ public class ConfigProfilesProcessor {
         final boolean update) {
 
         final var environmentPath = Path.of(path.toString(), configurationProfile.name());
-        final var latestVersion = getLatestHostedConfigVersion(application, configurationProfile);
+        final var latestVersion = configVersionService.getLatestHostedConfigVersion(application, configurationProfile);
         Optional<Path> configFileToUseForUpdate = Optional.empty();
 
         if (latestVersion.isPresent()) {
@@ -94,12 +96,12 @@ public class ConfigProfilesProcessor {
                 }
             }
         }
-        return configFileToUseForUpdate.map(configFilePath -> new ConfigEnv(configurationProfile.name(), configFilePath.toString()));
+        return configFileToUseForUpdate.map(configFilePath -> new ConfigEnv(configurationProfile.name()));
     }
 
     private void deleteOldAndUnusedHostedConfigVersions(final Application application, final ConfigurationProfile configurationProfile) {
 
-        final var versions = getHostedConfigurationVersions(application, configurationProfile);
+        final var versions = configVersionService.getHostedConfigurationVersions(application, configurationProfile);
 
         if (versions.size() > hostedConfigVersionsToKeep) {
             var deleteCounter = versions.size() - hostedConfigVersionsToKeep;
@@ -110,18 +112,6 @@ public class ConfigProfilesProcessor {
                 deleteCounter--;
             }
         }
-    }
-
-    private SortedSet<Integer> getHostedConfigurationVersions(final Application application, final ConfigurationProfile configurationProfile) {
-        final var versions = new TreeSet<Integer>();
-        appConfigFacade.listHostedConfigurationVersions(application, configurationProfile)
-            .forEach(hostedConfigurationVersion -> versions.add(hostedConfigurationVersion.versionNumber()));
-        return versions;
-    }
-
-    private Optional<Integer> getLatestHostedConfigVersion(final Application application, final ConfigurationProfile configurationProfile) {
-        final var versions = getHostedConfigurationVersions(application, configurationProfile);
-        return Optional.ofNullable(versions.isEmpty() ? null : versions.last());
     }
 
     private Optional<Pair<Path, String>> checkIfAnUpdateIsRequired(final Application application, final ConfigurationProfile configurationProfile,

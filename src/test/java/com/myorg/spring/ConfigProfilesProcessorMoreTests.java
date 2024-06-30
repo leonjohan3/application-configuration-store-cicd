@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@SpringJUnitConfig(classes = {ConfigProfilesProcessor.class, ConfigProfilesProcessorMoreTests.Config.class, Config.class})
+@SpringJUnitConfig(classes = {ConfigProfilesProcessor.class, ConfigVersionService.class, ConfigProfilesProcessorMoreTests.Config.class, Config.class})
 @TestPropertySource(properties = """
     app.config.group.prefix = acs
     app.config.root.config.folder = src/test/resources/invalid_config_folder_structures/with_folder_in_place_of_a_configuration_file

@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@SpringJUnitConfig(classes = {ConfigProfilesProcessor.class, ConfigProfilesProcessorTests.Config.class, Config.class})
+@SpringJUnitConfig(classes = {ConfigProfilesProcessor.class, ConfigVersionService.class, ConfigProfilesProcessorTests.Config.class, Config.class})
 @TestPropertySource(properties = """
     app.config.group.prefix = acs
     app.config.root.config.folder = src/test/resources/provided_input
