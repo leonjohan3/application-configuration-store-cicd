@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,6 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @TestPropertySource(properties = """
     app.config.group.prefix = acs
     app.config.root.config.folder = src/test/resources/provided_input
+    hosted.config.versions.to.keep=1
     """)
 @SuppressFBWarnings(value = "NP_NONNULL_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
 class ConfigProfilesProcessorTests {
@@ -198,5 +200,6 @@ class ConfigProfilesProcessorTests {
         });
 
         verify(APP_CONFIG_FACADE, times(3)).createHostedConfigVersion(any(), any(), anyString());
+        verify(APP_CONFIG_FACADE).deleteHostedConfigVersion(any(), any(), anyInt());
     }
 }

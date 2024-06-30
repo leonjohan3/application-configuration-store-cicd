@@ -30,7 +30,7 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 - enable PMD on all files
 - change package `com.myorg` to `org.example`
 - do load/perf test with many apps+envs
-- remove old configuration profiles (more than 10 versions)
+- remove old configuration profiles (more than 10 versions) [done]
 - test with max len app and conf names [done]
 
 # Add below rules to docs

@@ -20,22 +20,28 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 @Service
-@RequiredArgsConstructor
 @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 @Validated
 @Slf4j
 public class ConfigProfilesProcessor {
 
     private final AppConfigFacade appConfigFacade;
+    private final int hostedConfigVersionsToKeep;
+
+    public ConfigProfilesProcessor(final AppConfigFacade appConfigFacade, @Value("${hosted.config.versions.to.keep:10}") final int hostedConfigVersionsToKeep) {
+        this.appConfigFacade = appConfigFacade;
+        this.hostedConfigVersionsToKeep = hostedConfigVersionsToKeep;
+    }
 
     public @NotNull Set<ConfigApp> run(@NotNull final Path rootConfigFolder,
         @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix, final boolean update) {
@@ -73,6 +79,7 @@ public class ConfigProfilesProcessor {
 
                 if (update) { // update HostedConfigVersion (by creating a new version)
                     appConfigFacade.createHostedConfigVersion(application, configurationProfile, checkIfAnUpdateIsRequiredResult.get().getRight());
+                    deleteOldAndUnusedHostedConfigVersions(application, configurationProfile);
                 }
                 configFileToUseForUpdate = Optional.of(checkIfAnUpdateIsRequiredResult.get().getLeft());
             }
@@ -90,12 +97,30 @@ public class ConfigProfilesProcessor {
         return configFileToUseForUpdate.map(configFilePath -> new ConfigEnv(configurationProfile.name(), configFilePath.toString()));
     }
 
-    private Optional<Integer> getLatestHostedConfigVersion(final Application application, final ConfigurationProfile configurationProfile) {
+    private void deleteOldAndUnusedHostedConfigVersions(final Application application, final ConfigurationProfile configurationProfile) {
+
+        final var versions = getHostedConfigurationVersions(application, configurationProfile);
+
+        if (versions.size() > hostedConfigVersionsToKeep) {
+            var deleteCounter = versions.size() - hostedConfigVersionsToKeep;
+            final var iterator = versions.iterator();
+
+            while (iterator.hasNext() && deleteCounter > 0) {
+                appConfigFacade.deleteHostedConfigVersion(application, configurationProfile, iterator.next());
+                deleteCounter--;
+            }
+        }
+    }
+
+    private SortedSet<Integer> getHostedConfigurationVersions(final Application application, final ConfigurationProfile configurationProfile) {
         final var versions = new TreeSet<Integer>();
+        appConfigFacade.listHostedConfigurationVersions(application, configurationProfile)
+            .forEach(hostedConfigurationVersion -> versions.add(hostedConfigurationVersion.versionNumber()));
+        return versions;
+    }
 
-        appConfigFacade.listHostedConfigurationVersions(application, configurationProfile).forEach(hostedConfigurationVersion -> versions.add(
-            hostedConfigurationVersion.versionNumber()));
-
+    private Optional<Integer> getLatestHostedConfigVersion(final Application application, final ConfigurationProfile configurationProfile) {
+        final var versions = getHostedConfigurationVersions(application, configurationProfile);
         return Optional.ofNullable(versions.isEmpty() ? null : versions.last());
     }
 

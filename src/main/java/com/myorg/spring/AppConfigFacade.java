@@ -129,6 +129,15 @@ public class AppConfigFacade {
                 .build());
     }
 
+    public void deleteHostedConfigVersion(@Valid final Application application, final @Valid ConfigurationProfile configurationProfile,
+        @Min(1) final int hostedConfigurationVersion) {
+
+        appConfigClient.deleteHostedConfigurationVersion(builder -> builder.applicationId(application.id())
+            .configurationProfileId(configurationProfile.id())
+            .versionNumber(hostedConfigurationVersion)
+            .build());
+    }
+
     public @NotNull String getHostedConfigVersionContent(@Valid final Application application,
         final @Valid ConfigurationProfile configurationProfile, @Min(1) final int hostedConfigurationVersion) {
 
