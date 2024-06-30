@@ -1,18 +1,21 @@
 package com.myorg.model;
 
 import static java.util.Set.copyOf;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.Validate.notNull;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.myorg.model.ConfigRoot.ConfigRootBuilder;
-import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import org.apache.commons.lang3.builder.Builder;
 
 @JsonDeserialize(builder = ConfigRootBuilder.class)
-public record ConfigRoot(@NotBlank String rootFolder, Set<ConfigApp> applications) {
+public record ConfigRoot(String rootFolder, Set<ConfigApp> applications) { // TODO - make rootFolder type Path
 
     public ConfigRoot(final String rootFolder, final Set<ConfigApp> applications) {
+        notBlank(rootFolder, "rootFolder must not be null or blank");
+        notNull(applications, "applications must not be null");
         this.rootFolder = rootFolder;
         this.applications = copyOf(applications);
     }

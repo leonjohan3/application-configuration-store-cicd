@@ -20,13 +20,20 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 - [](<https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner-for-gradle/>)
 - [](<https://docs.spring.io/spring-framework/reference/index.html>)
 - [](<https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html>)
+- [](<https://commons.apache.org/proper/commons-lang/javadocs/api-release/index.html>)
 - [](<>)
 
 # Todo
 - manually create .git folder if not exist before running test (because .git folder cannot be commited to GitHub) [done]
 - search for and address all TODO's
-- if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]{1,59}$', name):
+- if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]{1,59}$', name): [done]
 - enable PMD on all files
 - change package `com.myorg` to `org.example`
 - do load/perf test with many apps+envs
-- remove old configuration profiles
+- remove old configuration profiles (more than 10 versions)
+- test with max len app and conf names [done]
+
+# Add below rules to docs
+- the root folder may contain folders and files (e.g. a README.md file, or .git folder)
+- all the 1st level folders (applications) should have one or more sub-folders (environments)
+- all the 2nd level folders (environments) should contain only a single configuration file

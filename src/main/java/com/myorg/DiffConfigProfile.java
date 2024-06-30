@@ -15,12 +15,13 @@ public class DiffConfigProfile {
         try (final var ctx = new AnnotationConfigApplicationContext()) {
             ctx.scan("com.myorg.spring");
             ctx.refresh();
+            final var configGroupPrefix = ctx.getEnvironment().getRequiredProperty(APP_CONFIG_GROUP_PREFIX);
             final var configApps = ctx.getBean(ConfigProfilesProcessor.class).run(Path.of(ctx.getEnvironment().getRequiredProperty(APP_CONFIG_ROOT_CONFIG_FOLDER)),
-                ctx.getEnvironment().getRequiredProperty(APP_CONFIG_GROUP_PREFIX), false);
+                configGroupPrefix, false);
 
             configApps.forEach(configApp -> configApp.environments().forEach(
-                configEnv -> log.info("The configuration of the `{}` environment of the `{}` application will be updated in AWS AppConfig", configEnv.name(),
-                    configApp.name())));
+                configEnv -> log.info("The configuration of the `{}` environment of the `{}` application will be updated in AWS AppConfig",
+                    configEnv.name(), configGroupPrefix + "/" + configApp.name())));
         }
     }
 }

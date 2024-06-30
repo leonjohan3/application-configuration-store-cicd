@@ -26,9 +26,10 @@ public class ConfigRootFactory {
         final var applications = new HashSet<ConfigApp>();
 
         try (var applicationPaths = Files.walk(rootFolder, MAX_WALK_DEPTH)) {
-            applicationPaths.filter(applicationPath -> !applicationPath.equals(rootFolder)).forEach(applicationPath -> {
+            applicationPaths.filter(
+                    applicationPath -> !applicationPath.equals(rootFolder) && !applicationPath.endsWith(Path.of(".git")) && applicationPath.toFile().isDirectory())
+                .forEach(applicationPath -> {
 
-                if (!applicationPath.endsWith(Path.of(".git")) && applicationPath.toFile().isDirectory()) {
                     final var environments = new HashSet<ConfigEnv>();
 
                     try (var environmentPaths = Files.walk(applicationPath, MAX_WALK_DEPTH)) {
@@ -41,8 +42,7 @@ public class ConfigRootFactory {
                         .name(applicationPath.getFileName().toString())
                         .environments(environments)
                         .build());
-                }
-            });
+                });
         }
         return ConfigRoot.builder()
             .rootFolder(rootFolder.toString())

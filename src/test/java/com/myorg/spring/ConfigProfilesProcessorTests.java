@@ -83,10 +83,10 @@ class ConfigProfilesProcessorTests {
         assertThat(applications, hasSize(2));
 
         applications.forEach(configApp -> {
-            if (configApp.name().equals("acs/retail")) {
+            if (configApp.name().equals("retail")) {
                 assertThat(configApp.environments(), hasSize(2));
             } else {
-                assertThat(configApp.name(), is("acs/sales_api"));
+                assertThat(configApp.name(), is("sales_api"));
                 assertThat(configApp.environments(), hasSize(1));
             }
         });
@@ -189,10 +189,10 @@ class ConfigProfilesProcessorTests {
         assertThat(applications, hasSize(2));
 
         applications.forEach(configApp -> {
-            if (configApp.name().equals("acs/retail")) {
+            if (configApp.name().equals("retail")) {
                 assertThat(configApp.environments(), hasSize(2));
             } else {
-                assertThat(configApp.name(), is("acs/sales_api"));
+                assertThat(configApp.name(), is("sales_api"));
                 assertThat(configApp.environments(), hasSize(1));
             }
         });

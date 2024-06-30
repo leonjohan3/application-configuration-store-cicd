@@ -43,13 +43,12 @@ public class ConfigProfilesProcessor {
         final var configApps = new HashSet<ConfigApp>();
 
         appConfigFacade.listApplications(configGroupPrefix)
-            .forEach(application -> processApplication(application, rootConfigFolder, configGroupPrefix, update).ifPresent(configApps::add));
+            .forEach(application -> processApplication(application, rootConfigFolder, update).ifPresent(configApps::add));
 
         return configApps;
     }
 
-    private Optional<ConfigApp> processApplication(final Application application, final Path rootConfigFolder, final String configGroupPrefix,
-        final boolean update) {
+    private Optional<ConfigApp> processApplication(final Application application, final Path rootConfigFolder, final boolean update) {
 
         final var configEnvs = new HashSet<ConfigEnv>();
 
@@ -57,7 +56,7 @@ public class ConfigProfilesProcessor {
             .forEach(configurationProfile -> processConfigurationProfile(application, configurationProfile,
                 Path.of(rootConfigFolder.toString(), application.plainName()), update).ifPresent(configEnvs::add));
 
-        return Optional.ofNullable(configEnvs.isEmpty() ? null : new ConfigApp(application.name(), configEnvs));
+        return Optional.ofNullable(configEnvs.isEmpty() ? null : new ConfigApp(application.plainName(), configEnvs));
     }
 
     private Optional<ConfigEnv> processConfigurationProfile(final Application application, final ConfigurationProfile configurationProfile, final Path path,
