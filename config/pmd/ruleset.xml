@@ -10,8 +10,8 @@
   </description>
 
   <!--  <rule ref="category/java/errorprone.xml/EmptyCatchBlock"/>-->
-  <exclude-pattern>.*/com/myorg/.*</exclude-pattern>
-  <include-pattern>.*/com/myorg/ConfigRootF.*</include-pattern>
+  <exclude-pattern>.*/org/example/.*</exclude-pattern>
+  <include-pattern>.*/org/example/ConfigRootF.*</include-pattern>
 
   <rule ref="category/java/bestpractices.xml">
     <exclude name="JUnitAssertionsShouldIncludeMessage"/>

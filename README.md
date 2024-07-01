@@ -28,7 +28,7 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 - search for and address all TODO's
 - if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]{1,59}$', name): [done]
 - enable PMD on all files
-- change package `com.myorg` to `org.example`
+- change package `com.myorg` to `org.example` [done]
 - do load/perf test with many apps+envs
 - remove old configuration profiles (more than 10 versions) [done]
 - test with max len app and conf names [done]
