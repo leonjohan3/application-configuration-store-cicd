@@ -1,3 +1,10 @@
+# Overview
+This project enables the use of AWS AppConfig as storage for externalized configuration of applications: e.g. storing the application.yaml in the case 
+of Java Spring Boot.
+
+# Concepts
+
+
 # Welcome to your CDK Java project!
 
 This is a blank project for CDK development with Java.
@@ -32,6 +39,8 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 - do load/perf test with many apps+envs [done]
 - remove old configuration profiles (more than 10 versions) [done]
 - test with max len app and conf names [done]
+- write go app to get latest version of the config (use static linking) [done]
+- modify acs-codepipeline to accept parameters
 
 # Add below rules to docs
 - the root folder may contain folders and files (e.g. a README.md file, or .git folder)

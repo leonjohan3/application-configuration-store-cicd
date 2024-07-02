@@ -41,3 +41,5 @@ target
 cdk.out
 
 !gradle-wrapper.jar
+getLatestConfig/getLatestConfig
+getLatestConfig/*.yaml
