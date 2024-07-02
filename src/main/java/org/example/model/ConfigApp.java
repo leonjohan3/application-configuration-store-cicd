@@ -24,7 +24,7 @@ public record ConfigApp(String name, @EqualsExclude @HashCodeExclude Set<ConfigE
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
@@ -44,22 +44,22 @@ public record ConfigApp(String name, @EqualsExclude @HashCodeExclude Set<ConfigE
     @JsonPOJOBuilder(withPrefix = "")
     public static class ConfigAppBuilder implements Builder<ConfigApp> {
 
-        private String name;
-        private Set<ConfigEnv> environments;
+        private String theName;
+        private Set<ConfigEnv> theEnvironments;
 
         public ConfigAppBuilder name(final String name) {
-            this.name = name;
+            this.theName = name;
             return this;
         }
 
         public ConfigAppBuilder environments(final Set<ConfigEnv> environments) {
-            this.environments = copyOf(environments);
+            this.theEnvironments = copyOf(environments);
             return this;
         }
 
         @Override
         public ConfigApp build() {
-            return new ConfigApp(name, environments);
+            return new ConfigApp(theName, theEnvironments);
         }
     }
 }

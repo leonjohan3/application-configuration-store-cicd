@@ -45,7 +45,6 @@ public class ConfigRootFactory {
                 });
         }
         return ConfigRoot.builder()
-            .rootFolder(rootFolder.toString())
             .applications(applications)
             .build();
     }

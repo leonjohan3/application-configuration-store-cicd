@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 @Service
-@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 @RequiredArgsConstructor
 @Validated
 public class ConfigVersionService {
@@ -21,7 +21,7 @@ public class ConfigVersionService {
     public SortedSet<Integer> getHostedConfigurationVersions(final Application application, final ConfigurationProfile configurationProfile) {
         final var versions = new TreeSet<Integer>();
         appConfigFacade.listHostedConfigurationVersions(application, configurationProfile)
-            .forEach(hostedConfigurationVersion -> versions.add(hostedConfigurationVersion.versionNumber()));
+            .forEach(configurationVersion -> versions.add(configurationVersion.versionNumber()));
         return versions;
     }
 

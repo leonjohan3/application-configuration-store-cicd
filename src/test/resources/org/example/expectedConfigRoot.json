@@ -1,5 +1,4 @@
 {
-  "rootFolder": "src/test/resources/provided_input",
   "applications": [
     {
       "name": "retail",

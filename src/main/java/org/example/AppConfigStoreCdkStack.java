@@ -17,10 +17,10 @@ import software.constructs.Construct;
 
 public final class AppConfigStoreCdkStack extends Stack {
 
-    public AppConfigStoreCdkStack(final Construct scope, final String id, final StackProps props, final Path rootFolder, final String configGroup)
+    public AppConfigStoreCdkStack(final Construct scope, final String identity, final StackProps props, final Path rootFolder, final String configGroup)
         throws IOException {
 
-        super(scope, id, props);
+        super(scope, identity, props);
 
         DeploymentStrategy.Builder.create(this, "applicationConfigurationStoreDeploymentStrategy")
             .rolloutStrategy(RolloutStrategy.linear(RolloutStrategyProps.builder()

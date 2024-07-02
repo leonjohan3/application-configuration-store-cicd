@@ -1,8 +1,8 @@
 package org.example.spring;
 
 import static java.nio.file.Files.readString;
-import static org.example.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
-import static org.example.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
+import static org.example.constants.ServiceConstants.CONFIG_GRP_MESSAGE;
+import static org.example.constants.ServiceConstants.CONFIG_GRP_PATTERN;
 import static org.example.constants.ServiceConstants.MAX_WALK_DEPTH;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -28,25 +28,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 @Service
-@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 @Validated
 @Slf4j
 public class ConfigProfilesProcessor {
 
     private final AppConfigFacade appConfigFacade;
     private final ConfigVersionService configVersionService;
-    private final int hostedConfigVersionsToKeep;
+    private final int configVersionsToKeep;
 
     public ConfigProfilesProcessor(final AppConfigFacade appConfigFacade, final ConfigVersionService configVersionService,
-        @Value("${hosted.config.versions.to.keep:10}") final int hostedConfigVersionsToKeep) {
+        @Value("${hosted.config.versions.to.keep:10}") final int configVersionsToKeep) {
 
         this.appConfigFacade = appConfigFacade;
         this.configVersionService = configVersionService;
-        this.hostedConfigVersionsToKeep = hostedConfigVersionsToKeep;
+        this.configVersionsToKeep = configVersionsToKeep;
     }
 
     public @NotNull Set<ConfigApp> run(@NotNull final Path rootConfigFolder,
-        @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix, final boolean update) {
+        @NotNull @Pattern(regexp = CONFIG_GRP_PATTERN, message = CONFIG_GRP_MESSAGE) final String configGroupPrefix, final boolean update) {
 
         final var configApps = new HashSet<ConfigApp>();
 
@@ -75,15 +75,15 @@ public class ConfigProfilesProcessor {
         Optional<Path> configFileToUseForUpdate = Optional.empty();
 
         if (latestVersion.isPresent()) {
-            final var checkIfAnUpdateIsRequiredResult = checkIfAnUpdateIsRequired(application, configurationProfile, latestVersion.get(), environmentPath);
+            final var updateIsRequiredResult = checkIfAnUpdateIsRequired(application, configurationProfile, latestVersion.get(), environmentPath);
 
-            if (checkIfAnUpdateIsRequiredResult.isPresent()) {
+            if (updateIsRequiredResult.isPresent()) {
 
                 if (update) { // update HostedConfigVersion (by creating a new version)
-                    appConfigFacade.createHostedConfigVersion(application, configurationProfile, checkIfAnUpdateIsRequiredResult.get().getRight());
+                    appConfigFacade.createHostedConfigVersion(application, configurationProfile, updateIsRequiredResult.get().getRight());
                     deleteOldAndUnusedHostedConfigVersions(application, configurationProfile);
                 }
-                configFileToUseForUpdate = Optional.of(checkIfAnUpdateIsRequiredResult.get().getLeft());
+                configFileToUseForUpdate = Optional.of(updateIsRequiredResult.get().getLeft());
             }
 
         } else {
@@ -103,8 +103,8 @@ public class ConfigProfilesProcessor {
 
         final var versions = configVersionService.getHostedConfigurationVersions(application, configurationProfile);
 
-        if (versions.size() > hostedConfigVersionsToKeep) {
-            var deleteCounter = versions.size() - hostedConfigVersionsToKeep;
+        if (versions.size() > configVersionsToKeep) {
+            var deleteCounter = versions.size() - configVersionsToKeep;
             final var iterator = versions.iterator();
 
             while (iterator.hasNext() && deleteCounter > 0) {
@@ -121,8 +121,8 @@ public class ConfigProfilesProcessor {
         final var configFileAndContent = getConfigFileAndContent(path);
 
         if (configFileAndContent.isPresent()) {
-            final var hostedConfigVersionContent = appConfigFacade.getHostedConfigVersionContent(application, configurationProfile, version);
-            hasDiff = !configFileAndContent.get().getRight().equals(hostedConfigVersionContent);
+            final var configVersionContent = appConfigFacade.getHostedConfigVersionContent(application, configurationProfile, version);
+            hasDiff = !configFileAndContent.get().getRight().equals(configVersionContent);
         }
 
         return Optional.ofNullable(hasDiff ? configFileAndContent.get() : null);
@@ -130,16 +130,18 @@ public class ConfigProfilesProcessor {
 
     private Optional<Pair<Path, String>> getConfigFileAndContent(final Path path) {
 
+        Optional<Pair<Path, String>> result = Optional.empty();
+
         try (var environmentPaths = Files.walk(path, MAX_WALK_DEPTH)) {
 
             final var configFile = environmentPaths.filter(environmentPath -> environmentPath.toFile().isFile()).findFirst();
-            return Optional.ofNullable(configFile.isPresent() ? new ImmutablePair<>(configFile.get(), readString(configFile.get())) : null);
+            result = Optional.ofNullable(configFile.isPresent() ? new ImmutablePair<>(configFile.get(), readString(configFile.get())) : null);
 
         } catch (NoSuchFileException e) {
             log.debug("ignoring NoSuchFileException");
-            return Optional.empty();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        return result;
     }
 }

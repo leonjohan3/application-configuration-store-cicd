@@ -1,8 +1,8 @@
 package org.example.spring;
 
 import static java.lang.String.format;
-import static org.example.constants.ServiceConstants.CONFIG_GROUP_PREFIX_MESSAGE;
-import static org.example.constants.ServiceConstants.CONFIG_GROUP_PREFIX_PATTERN;
+import static org.example.constants.ServiceConstants.CONFIG_GRP_MESSAGE;
+import static org.example.constants.ServiceConstants.CONFIG_GRP_PATTERN;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.validation.constraints.NotNull;
@@ -24,15 +24,15 @@ import org.springframework.validation.annotation.Validated;
 
 @Service
 @RequiredArgsConstructor
-@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 @Validated
-public class ConfigProfileDeployer {
+public class ConfigProfilesDeployer {
 
     private final AppConfigFacade appConfigFacade;
     private final ConfigVersionService configVersionService;
 
     public @NotNull Set<ConfigApp> run(
-        @NotNull @Pattern(regexp = CONFIG_GROUP_PREFIX_PATTERN, message = CONFIG_GROUP_PREFIX_MESSAGE) final String configGroupPrefix) {
+        @NotNull @Pattern(regexp = CONFIG_GRP_PATTERN, message = CONFIG_GRP_MESSAGE) final String configGroupPrefix) {
 
         final var configApps = new HashSet<ConfigApp>();
         final var deploymentStrategy = getDeploymentStrategy(configGroupPrefix);
@@ -58,15 +58,15 @@ public class ConfigProfileDeployer {
         final DeploymentStrategy deploymentStrategy) {
 
         Optional<ConfigEnv> configEnv = Optional.empty();
-        final var optionalConfigurationEnvironment = getConfigurationEnvironment(application, configurationProfile);
+        final var optionalConfigEnv = getConfigurationEnvironment(application, configurationProfile);
 
-        if (optionalConfigurationEnvironment.isEmpty()) {
+        if (optionalConfigEnv.isEmpty()) {
             throw new IllegalStateException(
                 format("unable to get configuration environment for application `%s`, and environment `%s`", application.name(), configurationProfile.name()));
         }
-        final var configurationEnvironment = optionalConfigurationEnvironment.get();
+        final var configurationEnvironment = optionalConfigEnv.get();
 
-        if (!configurationEnvironment.state().equals("ReadyForDeployment")) {
+        if (!"ReadyForDeployment".equals(configurationEnvironment.state())) {
             throw new IllegalStateException(
                 format("configuration environment not ready for deployment for application `%s`, and environment `%s`", application.name(),
                     configurationProfile.name()));
@@ -79,7 +79,7 @@ public class ConfigProfileDeployer {
 
             if (hostedConfigVersion.get() > latestDeployedVersion) {
                 appConfigFacade.deployHostedConfigVersion(application, configurationProfile, configurationEnvironment, hostedConfigVersion.get(),
-                    deploymentStrategy.id());
+                    deploymentStrategy.strategyId());
                 configEnv = Optional.of(new ConfigEnv(configurationProfile.name()));
             }
         }

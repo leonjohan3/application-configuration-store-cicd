@@ -1,7 +1,6 @@
 package org.example.model;
 
 import static java.util.Set.copyOf;
-import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -11,12 +10,10 @@ import org.apache.commons.lang3.builder.Builder;
 import org.example.model.ConfigRoot.ConfigRootBuilder;
 
 @JsonDeserialize(builder = ConfigRootBuilder.class)
-public record ConfigRoot(String rootFolder, Set<ConfigApp> applications) { // TODO - make rootFolder type Path
+public record ConfigRoot(Set<ConfigApp> applications) {
 
-    public ConfigRoot(final String rootFolder, final Set<ConfigApp> applications) {
-        notBlank(rootFolder, "rootFolder must not be null or blank");
+    public ConfigRoot(final Set<ConfigApp> applications) {
         notNull(applications, "applications must not be null");
-        this.rootFolder = rootFolder;
         this.applications = copyOf(applications);
     }
 
@@ -31,22 +28,16 @@ public record ConfigRoot(String rootFolder, Set<ConfigApp> applications) { // TO
     @JsonPOJOBuilder(withPrefix = "")
     public static class ConfigRootBuilder implements Builder<ConfigRoot> {
 
-        private String rootFolder;
-        private Set<ConfigApp> applications;
-
-        public ConfigRootBuilder rootFolder(final String rootFolder) {
-            this.rootFolder = rootFolder;
-            return this;
-        }
+        private Set<ConfigApp> theApplications;
 
         public ConfigRootBuilder applications(final Set<ConfigApp> applications) {
-            this.applications = copyOf(applications);
+            this.theApplications = copyOf(applications);
             return this;
         }
 
         @Override
         public ConfigRoot build() {
-            return new ConfigRoot(rootFolder, applications);
+            return new ConfigRoot(theApplications);
         }
     }
 }

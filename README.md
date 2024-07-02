@@ -25,11 +25,11 @@ It is a [Maven](https://maven.apache.org/) based project, so you can open this p
 
 # Todo
 - manually create .git folder if not exist before running test (because .git folder cannot be commited to GitHub) [done]
-- search for and address all TODO's
+- search for and address all TODO's [done]
 - if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]{1,59}$', name): [done]
-- enable PMD on all files
+- enable PMD on all files [done]
 - change package `com.myorg` to `org.example` [done]
-- do load/perf test with many apps+envs
+- do load/perf test with many apps+envs [done]
 - remove old configuration profiles (more than 10 versions) [done]
 - test with max len app and conf names [done]
 
