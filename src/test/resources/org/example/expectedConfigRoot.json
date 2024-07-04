@@ -1,0 +1,26 @@
+{
+  "applications": [
+    {
+      "name": "retail",
+      "environments": [
+        {
+          "name": "test"
+        },
+        {
+          "name": "prod"
+        }
+      ]
+    },
+    {
+      "name": "sales_api",
+      "environments": [
+        {
+          "name": "pre-prod"
+        },
+        {
+          "name": "prod"
+        }
+      ]
+    }
+  ]
+}
