@@ -19,31 +19,25 @@ dependencies {
     implementation 'software.amazon.awscdk:aws-cdk-lib:2.143.0'
     implementation 'software.constructs:constructs:10.3.0'
 
-    implementation ('software.amazon.awssdk:appconfig:2.25.50') {
+    implementation('software.amazon.awssdk:appconfig:2.25.50') {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
 
-//    implementation 'commons-cli:commons-cli:1.8.0'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
-    implementation 'com.google.guava:guava:33.2.1-jre'
-
     implementation platform('org.springframework:spring-framework-bom:6.1.10')
-//    implementation 'org.springframework:spring-beans'
     implementation 'org.springframework:spring-context'
     implementation 'org.hibernate.validator:hibernate-validator'
     implementation 'org.apache.tomcat.embed:tomcat-embed-el'
 
     implementation platform('org.springframework.boot:spring-boot-dependencies:3.3.1')
     implementation 'org.springframework.boot:spring-boot-starter-logging'
-//    implementation 'org.springframework.boot:spring-boot-starter:3.3.0'
-//    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'org.apache.commons:commons-lang3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.hamcrest:hamcrest'
     testImplementation 'org.skyscreamer:jsonassert'
     testImplementation 'org.mockito:mockito-junit-jupiter'
     testImplementation 'org.springframework:spring-test'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -55,7 +49,6 @@ java {
 }
 
 application {
-    // Define the main class for the application.
     mainClass = 'org.example.AppConfigStoreCdkApp'
 }
 

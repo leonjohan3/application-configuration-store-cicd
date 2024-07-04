@@ -33,7 +33,7 @@ bg=red</panel_attributes>
       <w>420</w>
       <h>170</h>
     </coordinates>
-    <panel_attributes>Clone GitHub repositories Stage
+    <panel_attributes>Stage: clone GitHub repositories 
 bg=orange</panel_attributes>
     <additional_attributes/>
   </element>
@@ -45,7 +45,7 @@ bg=orange</panel_attributes>
       <w>420</w>
       <h>170</h>
     </coordinates>
-    <panel_attributes>Discover proposed configuration changes Stage
+    <panel_attributes>Stage: discover proposed configuration changes 
 bg=orange</panel_attributes>
     <additional_attributes/>
   </element>
@@ -69,7 +69,7 @@ bg=red</panel_attributes>
       <w>420</w>
       <h>170</h>
     </coordinates>
-    <panel_attributes>Manual approval Stage
+    <panel_attributes>Stage: manual approval 
 bg=orange</panel_attributes>
     <additional_attributes/>
   </element>
@@ -93,7 +93,7 @@ bg=red</panel_attributes>
       <w>420</w>
       <h>170</h>
     </coordinates>
-    <panel_attributes>Deploy proposed configuration changes Stage
+    <panel_attributes>Stage: deploy proposed configuration changes 
 bg=orange</panel_attributes>
     <additional_attributes/>
   </element>
