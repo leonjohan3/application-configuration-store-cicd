@@ -2,7 +2,8 @@
 Go command line utility to get the latest configuration (e.g. application.yaml), based on the application and environment names, from AWS AppConfig.
 
 # Background
-This standalone command line utility can be used e.g. in the Java Spring Boot startup script (in the Dockerfile) to get the latest configuration (e.g. application.yaml) like this:
+This standalone command line utility can be used e.g. in the Java Spring Boot startup script (in the Dockerfile if using Docker) to get the latest configuration 
+(e.g. application.yaml) like this:
 ```bash
 #!/bin/bash
 
@@ -12,10 +13,10 @@ exec java -Dspring.profiles.active=prod -Duser.home=/tmp -Xms768m -Xmx768m -cp a
 ```
 
 # Building
-`go build getLatestConfig.go`
+Change directory to this folder, then run `go build getLatestConfig.go`
 
 # Prerequisites
-- Install go, e.g. `brew install golang`
+- Install go, e.g. `sudo yum install golang`
 
 # Usage
 `./getLatestConfig -a acs/application_name -e environment -o config/application.yaml`
@@ -31,10 +32,11 @@ Usage of getLatestConfig:
 ```
 
 # Notes
-- The application_name should include the configuration group prefix, e.g. `-a acs/sales_api` and needs to match the application name in AWS AppConfig
-- The environment is e.g. `prod`, `test`, `dev`, etc. and needs to match the ConfigurationProfile in AWS AppConfig
-- The output option specifies where the configuration file (e.g. application.yaml) should be created
-- If the configuration file needs to be created inside a folder, e.g. `config`, the folder must already exist
+- The application_name should include the configuration group prefix, e.g. `-a acs/sales_api` and needs to match the application name in AWS AppConfig.
+- The environment is e.g. `prod`, `test`, `dev`, etc. and needs to match the ConfigurationProfile in AWS AppConfig.
+- The output option specifies where the configuration file (e.g. application.yaml) should be created.
+- If the configuration file needs to be created inside a folder, e.g. `config`, the folder must already exist.
+- Golang was selected because it provides a standalone executable that adds less then 12MB to the Docker image. 
 
 # Resources
 - [AWS SDK for Go V2](<https://aws.github.io/aws-sdk-go-v2/docs/getting-started/>)

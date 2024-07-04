@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.1">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>40</x>
+      <y>330</y>
+      <w>300</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>application-configuration-store
+--
+bg=orange
+Application Configuration Store A</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>80</x>
+      <y>80</y>
+      <w>460</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>acs-codepipeline
+--
+bg=blue
+AWS cdk project to create AWS CodePipeline and related 
+resources</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>100</x>
+      <y>170</y>
+      <w>110</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+ Create </panel_attributes>
+    <additional_attributes>10.0;100.0;80.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>300</x>
+      <y>740</y>
+      <w>540</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>application-configuration-store-cicd
+--
+bg=red
+CI/CD to deploy a `application-configuration-store` Git repo to AppConfig</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>410</x>
+      <y>330</y>
+      <w>300</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>application-configuration-store
+--
+bg=orange
+Application Configuration Store B</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>780</x>
+      <y>330</y>
+      <w>300</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>application-configuration-store
+--
+bg=orange
+Application Configuration Store ...</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>140</x>
+      <y>640</y>
+      <w>210</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+ pipeline uses</panel_attributes>
+    <additional_attributes>190.0;100.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>80</x>
+      <y>50</y>
+      <w>360</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>https://github.com/xxxxxxxx/acs-codepipeline
+style=wordwrap</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>300</x>
+      <y>830</y>
+      <w>500</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>https://github.com/xxxxxxxx/application-configuration-store-cicd
+style=wordwrap</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>20</x>
+      <y>270</y>
+      <w>350</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>AWS CodePipeline 1
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>390</x>
+      <y>270</y>
+      <w>350</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>AWS CodePipeline 2
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>760</x>
+      <y>270</y>
+      <w>350</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>AWS CodePipeline n
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>710</x>
+      <y>140</y>
+      <w>490</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>There is an `application-configuration-store` Git repo 
+created for each team/dept. that keep the configurations 
+for the applications that belong to them
+style=wordwrap</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>260</x>
+      <y>170</y>
+      <w>230</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+       Create</panel_attributes>
+    <additional_attributes>210.0;100.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>470</x>
+      <y>170</y>
+      <w>340</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+     Create </panel_attributes>
+    <additional_attributes>320.0;100.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>420</x>
+      <y>640</y>
+      <w>150</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+ pipeline uses</panel_attributes>
+    <additional_attributes>10.0;100.0;130.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>660</x>
+      <y>640</y>
+      <w>280</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+ pipeline uses</panel_attributes>
+    <additional_attributes>10.0;120.0;260.0;10.0</additional_attributes>
+  </element>
+</diagram>

@@ -29,7 +29,7 @@ public class AppConfigStoreCdkApp {
 
         new AppConfigStoreCdkStack(app, "applicationConfigurationStore-" + configGroupEnvVar, StackProps.builder()
             .description("AWS AppConfig CI/CD for the application configuration store: " + configGroupEnvVar)
-            .tags(Map.of(GROUP_PREFIX, configGroupEnvVar))
+            .tags(Map.of(GROUP_PREFIX, configGroupEnvVar, "app", "application-configuration-store"))
             .terminationProtection(true)
             .build(), Path.of(rootFolderEnvVar), configGroupEnvVar);
 
