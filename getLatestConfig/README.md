@@ -13,7 +13,7 @@ exec java -Dspring.profiles.active=prod -Duser.home=/tmp -Xms768m -Xmx768m -cp a
 ```
 
 # Building (suggestion: use AWS CloudShell)
-Change directory to this folder, then run `go build getLatestConfig.go`
+Change directory to this folder, then run `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build getLatestConfig.go`
 
 # Prerequisites
 - Install go, e.g. `sudo yum install golang`
