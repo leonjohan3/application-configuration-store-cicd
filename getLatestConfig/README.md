@@ -12,7 +12,7 @@ mkdir -p config
 exec java -Dspring.profiles.active=prod -Duser.home=/tmp -Xms768m -Xmx768m -cp app/BOOT-INF/classes:app/BOOT-INF/lib/* org.example.MyApplication
 ```
 
-# Building
+# Building (suggestion: use AWS CloudShell)
 Change directory to this folder, then run `go build getLatestConfig.go`
 
 # Prerequisites
@@ -36,7 +36,7 @@ Usage of getLatestConfig:
 - The environment is e.g. `prod`, `test`, `dev`, etc. and needs to match the ConfigurationProfile in AWS AppConfig.
 - The output option specifies where the configuration file (e.g. application.yaml) should be created.
 - If the configuration file needs to be created inside a folder, e.g. `config`, the folder must already exist.
-- Golang was selected because it provides a standalone executable that adds less then 12MB to the Docker image. 
+- Golang was selected because it provides a standalone executable that adds less than 12MB to the Docker image.
 
 # Resources
 - [AWS SDK for Go V2](<https://aws.github.io/aws-sdk-go-v2/docs/getting-started/>)

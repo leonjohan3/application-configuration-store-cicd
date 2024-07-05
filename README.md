@@ -12,4 +12,4 @@ of Java Spring Boot. It contains the functionality to sync an `application-confi
 - [Mockito](<https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html>)
 - [Apache commons-lang](<https://commons.apache.org/proper/commons-lang/javadocs/api-release/index.html>)
 - [AWS CDK Toolkit (cdk command)](<https://docs.aws.amazon.com/cdk/v2/guide/cli.html>)
-- [Creating UML diagrams](<https://en.wikipedia.org/wiki/UMLet>)
+- [UMLet - Creating UML diagrams](<https://en.wikipedia.org/wiki/UMLet>)
